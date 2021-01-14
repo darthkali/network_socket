@@ -14,29 +14,38 @@
 int main(int argc, const char* argv[]) {
 	printf("Starting script.\n");
 	int tcp = 0;
+
+    if(tcp != 0 && tcp != 1){
+        perror("no valid protocol! use either tcp or udp");
+        return -1;
+    }
+
 	int sd;
 	struct sockaddr_in saddr;
 	socklen_t saddrlen;
-	char sbuf[BUFFERSIZE], rbuf[BUFFERSIZE];
-	int sbuflen, rbuflen;
+	char sbuf[BUFFERSIZE];
+	char rbuf[BUFFERSIZE];
+	int sbuflen;
+	int rbuflen;
 
 	strcpy(sbuf, "Danny Steinbrecher");
 
-	if (tcp == 0) {
-		// -------------------- UDP
-		printf("UDP.\n");
-        bzero ( ( char * ) &saddr, sizeof ( saddr ) );
- 		saddr.sin_family = AF_INET;
- 		saddr.sin_addr.s_addr = inet_addr ( SERVER );
-		saddr.sin_port = htons(PORT_UDP);
-		
-		sbuflen = strlen(sbuf);
-		saddrlen = sizeof(saddr);
+    bzero ( ( char * ) &saddr, sizeof ( saddr ) );
+    saddr.sin_family = AF_INET;
+    saddr.sin_addr.s_addr = inet_addr ( SERVER );
+    saddr.sin_port = htons (PORT_TCP);
 
-		if ((sd = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
-			perror("socket");
-			return -1;
-		}
+    sbuflen = strlen(sbuf);
+    saddrlen = sizeof(saddr);
+
+    if ((sd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("socket");
+        return -1;
+    }
+
+	if (tcp == 0) { 		// -------------------- UDP
+		printf("UDP.\n");
+
 
 		// Send my name
 		if (sendto(sd, sbuf, sbuflen, 0, (struct sockaddr*)&saddr, saddrlen) != sbuflen) {
@@ -49,6 +58,7 @@ int main(int argc, const char* argv[]) {
 			perror("recvfrom");
 			return -1;
 		}
+
 		rbuf[rbuflen] = 0;
 		printf("%s\n", rbuf);
 
@@ -57,30 +67,16 @@ int main(int argc, const char* argv[]) {
 			perror("sendto");
 			return -1;
 		}
-		close(sd);
 
-	} else if (tcp == 1) {
-		// -------------------- TCP
+	} else 		// -------------------- TCP
 		printf("TCP.\n");
-
-		bzero ( ( char * ) &saddr, sizeof ( saddr ) );
-        saddr.sin_family = AF_INET;
-        saddr.sin_port = htons ( PORT_TCP );
-        saddr.sin_addr.s_addr = inet_addr ( SERVER );
-
-		sbuflen = strlen(sbuf);
-		saddrlen = sizeof(saddr);
-		
-		if ((sd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-			perror("socket");
-			return -1;
-		}
 
 		// Send my name
 		if (connect(sd, (struct sockaddr*)&saddr, saddrlen) < 0) {
 			perror("connect");
 			return -1;
 		}
+
 		if (send(sd, sbuf, sbuflen, 0) != sbuflen) {
 			perror("send");
 			return -1;
@@ -91,6 +87,7 @@ int main(int argc, const char* argv[]) {
 			perror("recvfrom");
 			return -1;
 		}
+
 		rbuf[rbuflen] = 0;
 		printf("%s\n", rbuf);
 
@@ -99,12 +96,9 @@ int main(int argc, const char* argv[]) {
 			perror("send");
 			return -1;
 		}
-		close(sd);
 
 	}
-	else {
-		perror("no valid protocol! use either tcp or udp");
-	}
+    close(sd);
 	return 0;
 }
 
