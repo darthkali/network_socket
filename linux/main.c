@@ -67,8 +67,9 @@ int main(int argc, const char* argv[]) {
 			perror("sendto");
 			return -1;
 		}
+        close(sd);
 
-	} else 		// -------------------- TCP
+	} else {	// -------------------- TCP
 		printf("TCP.\n");
 
 		// Send my name
@@ -96,9 +97,9 @@ int main(int argc, const char* argv[]) {
 			perror("send");
 			return -1;
 		}
-
+        close(sd);
 	}
-    close(sd);
+
 	return 0;
 }
 
