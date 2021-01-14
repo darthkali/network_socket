@@ -38,22 +38,28 @@ int main(int argc, const char* argv[]) {
     sbuflen = strlen(sbuf);
     saddrlen = sizeof(saddr);
 
-    if ((sd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("socket");
-        return -1;
-    }
+
 
 	if (tcp == 0) { 		// -------------------- UDP
 		printf("UDP.\n");
 
 
+        if ((sd = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
+            perror("socket");
+            return -1;
+        }
+
 		// Send my name
-		if (sendto(sd, sbuf, sbuflen, 0, (struct sockaddr*)&saddr, saddrlen) != sbuflen) {
-			perror("sendto");
-				return -1;
-		}
+        printf("SendTo:\n");
+        if (sendto(sd, sbuf, sbuflen, 0, (struct sockaddr*)&saddr, saddrlen) != sbuflen) {
+            perror("sendto");
+            return -1;
+        }
+
+
 
 		// receive response
+        printf("receive response:\n");
 		if ((rbuflen = recvfrom(sd, rbuf, BUFFERSIZE, 0, (struct sockaddr*)&saddr, &saddrlen)) < 0) {
 			perror("recvfrom");
 			return -1;
@@ -71,6 +77,11 @@ int main(int argc, const char* argv[]) {
 
 	} else {	// -------------------- TCP
 		printf("TCP.\n");
+
+        if ((sd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+            perror("socket");
+            return -1;
+        }
 
 		// Send my name
 		if (connect(sd, (struct sockaddr*)&saddr, saddrlen) < 0) {
